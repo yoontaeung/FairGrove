@@ -12,7 +12,7 @@ func main() {
 
 	// Load transactions and construct the DAG
 	for i := 1; ; i++ {
-		filename := fmt.Sprintf("transactions_hash_%d.json", i)
+		filename := fmt.Sprintf("../test/test_case_%d.json", i)
 		data, err := ioutil.ReadFile(filename)
 		if err != nil {
 			break
@@ -36,15 +36,4 @@ func main() {
 
 	// Print or show the whole graph
 	originalDAG.PrintGraph()
-	if originalDAG.HasCycle() {
-		// to step 2
-		fmt.Println("The graph has a cycle. Handling strongly connected components...")
-
-	} else {
-		fmt.Println("The graph is acyclic.")
-		fmt.Println("Performing topological sort...")
-		sortOrder, _ := originalDAG.TopologicalSort()
-		originalDAG.PrintSortOrder(sortOrder)
-	}
-
 }

@@ -21,10 +21,27 @@ func (dag *DAG) AddVertex(vertex string) {
 }
 
 func (dag *DAG) AddEdge(from, to string) {
-	if dag.Edges[from] == nil {
-		dag.Edges[from] = make(map[string]bool)
+	// Check if the vertices exist
+	if dag.Vertices[from] && dag.Vertices[to] {
+		// Check if the edge already exists
+		if dag.Edges[from][to] {
+			// Edge from 'from' to 'to' already exists, no need to add
+			return
+		}
+
+		// Check if the opposite edge exists
+		if dag.Edges[to][from] {
+			// Edge from 'to' to 'from' exists, remove it
+			delete(dag.Edges[to], from)
+			return
+		}
+
+		// Add the new edge from 'from' to 'to'
+		if dag.Edges[from] == nil {
+			dag.Edges[from] = make(map[string]bool)
+		}
+		dag.Edges[from][to] = true
 	}
-	dag.Edges[from][to] = true
 }
 
 func (dag *DAG) PrintGraph() {
