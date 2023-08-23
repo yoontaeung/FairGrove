@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from utils import tx_generate
 
+# Function to generate the node orderings from local sequences
 def generate_node_orderings(local_sequences):
     # Get a list of all unique transactions
     all_transactions = sorted(set(tx for seq in local_sequences for tx in seq))
-    
     num_transactions = len(all_transactions)
     
     # Create a dictionary to map transactions to indices
@@ -23,6 +23,7 @@ def generate_node_orderings(local_sequences):
     
     return all_transactions, node_orderings
 
+# Function to construct the directed graph from transaction sequences
 def construct_graph(all_transactions, local_sequences):
     num_txs = len(local_sequences[0])  # Number of all transactions
     G = nx.DiGraph()
@@ -40,16 +41,15 @@ def construct_graph(all_transactions, local_sequences):
                         second_counter += 1
             
             if first_counter > second_counter:
-                # print(all_transactions[first], all_transactions[second])
                 G.add_edge(all_transactions[first], all_transactions[second])
             elif first_counter < second_counter:
-                # print(all_transactions[second], all_transactions[first])
                 G.add_edge(all_transactions[second], all_transactions[first])
     
     return G
 
+# Function to visualize the graph
 def visualize_graph(G):
-    # Use spring layout algorithm to arrange nodes
+    # Use circular layout algorithm to arrange nodes
     pos = nx.circular_layout(G)
 
     # Draw the graph with the calculated positions
@@ -58,38 +58,33 @@ def visualize_graph(G):
     # Display the graph
     plt.show()
 
+# Main function to run the program
 def run():
-    pre_local_sequences = tx_generate(100, 10)
-    # pre_local_sequences = [
-    #     ['tx1', 'tx3', 'tx2'],
-    #     ['tx4', 'tx1', 'tx5'],
-    #     ['tx3', 'tx4', 'tx2']
-    # ]
+    # pre_local_sequences = tx_generate(100, 10)
+    #### TODO: the graph that has a big cycle. Do we use a Hamiltonian path????
 
+    
+    pre_local_sequences = [
+        ['tx1', 'tx3', 'tx2'],
+        ['tx4', 'tx1', 'tx5'],
+        ['tx3', 'tx4', 'tx2']
+    ]
+    
     all_transactions, local_sequences = generate_node_orderings(pre_local_sequences)
-    # print("Node Orderings:")
-    # print(local_sequences)
     
     G = construct_graph(all_transactions, local_sequences)
-    # print("Graph Edges:")
-    # print(G.edges)
-    # print(G)
-    # visualize_graph(G)
-    # print("Topological Sort:")
-    # print(list(nx.topological_sort(G)))
+    visualize_graph(G)
 
+    # Identify strongly connected components (SCCs)
     scc = list(nx.strongly_connected_components(G))
-    # print("Strongly Connected Components:")
-    # print(scc)
     
+    # Condense the graph and create a condensed graph
     condensed_G = nx.condensation(G, scc)
-    # print("Condensed Graph Edges:")
-    # print(condensed_G.edges)
     
+    # Perform topological sort on the condensed graph
     topological_order = list(nx.topological_sort(condensed_G))
-    # print("Topological Sort on Condensed Graph:")
-    # print(topological_order)
 
+    # Reconstruct the sorted transactions based on condensed node order
     sorted_transactions = []
     for condensed_node in topological_order:
         original_vertices = scc[condensed_node]

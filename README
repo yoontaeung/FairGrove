@@ -4,7 +4,7 @@ Construct a directed graph \( G = (V, E) \) where \( V \) represents the set of 
 - Add a new vertex if it doesn't already exist.
 - Weighted Sum vs Themis
   - The graph construction in FairGrove is different from Themis. In Themis, all honest nodes(sequencers in FairGrove) share the same set of transactions(vertices in graph). However, FairGrove does not assume the same set of transactions between sequencers. Therefore, the modified rule of constructing graph should be applied. 
-- Add an edge if it's not already present. If an edge with the opposite direction exists, replace it with the new edge.
+- Add an edge if it's not already present. Each edge has its own weight. If an edge with the opposite direction exists, replace it with the new edge.
   - For instance, if there's an edge \((a, b)\) going from vertex \(a\) to \(b\), and you encounter \((b, a)\), remove the existing edge and take no action.
   - If you identify another edge between vertices \(a\) and \(b\), add it.
 - vertex가 완전히 공유되지 않는데 차이
