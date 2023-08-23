@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+const (
+	minTransactionsPerSequence = 2
+	hashLength                 = 5
+)
+
 type Transaction struct {
 	From     string `json:"from"`
 	To       string `json:"to"`
@@ -23,7 +28,8 @@ type Transaction struct {
 func calculateTransactionHash(transaction Transaction) string {
 	transactionJSON, _ := json.Marshal(transaction)
 	hash := sha256.Sum256([]byte(transactionJSON))
-	return hex.EncodeToString(hash[:])
+	hashString := hex.EncodeToString(hash[:])
+	return hashString[:hashLength] // Truncate the hash to hashLength characters
 }
 
 func generateRandomTransaction() Transaction {
@@ -92,6 +98,7 @@ func writeTransactionHashesToFile(transactionHashes []string, filename string) e
 }
 
 func TxGenerate(k int, n int) {
+	// k: number of all transactions, n: number of sequences
 	rand.Seed(time.Now().UnixNano())
 
 	transactions, transactionHashes := generateTransactions(k)
@@ -109,10 +116,16 @@ func TxGenerate(k int, n int) {
 
 	maxTransactionsPerFile := 5
 
+	// Calculate the minimum number of transactions per sequence
+	minTransactionsPerSequence := minTransactionsPerSequence
+	if k < minTransactionsPerSequence {
+		minTransactionsPerSequence = k
+	}
+
+	usedIndices := 0
 	for i := 1; i <= n; i++ {
 		sharedIndices := rand.Perm(k) // Reset sharedIndices for each batch
-		usedIndices := 0
-		numTransactions := rand.Intn(maxTransactionsPerFile) + 1
+		numTransactions := rand.Intn(maxTransactionsPerFile-minTransactionsPerSequence+1) + minTransactionsPerSequence
 
 		if usedIndices+numTransactions > k {
 			sharedIndices = rand.Perm(k)
