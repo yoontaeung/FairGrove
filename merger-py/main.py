@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from utils import tx_generate
 import time
+from tqdm import tqdm
 
 # Function to generate the node orderings from local sequences
 def generate_transaction_orderings(local_sequences):
@@ -60,19 +61,18 @@ def visualize_graph(G):
     plt.show()
 
 # Main function to run the program
-def run():
-    start_time = time.time()
-    
-    pre_local_sequences = tx_generate(100000, 10)
-    #### TODO: the graph that has a big cycle. Do we use a Hamiltonian path????
+def run(pre_local_sequences):
+    # pre_local_sequences = tx_generate(100000, 10)
+    # #### TODO: the graph that has a big cycle. Do we use a Hamiltonian path????
 
-    
     # pre_local_sequences = [
-    #     ['tx1', 'tx3', 'tx2'],
-    #     ['tx4', 'tx1', 'tx5'],
-    #     ['tx3', 'tx4', 'tx2']
+    #     ['sdf', 'tx1', 'tx3', 'tx2'],
+    #     ['tx4', 'tx1', 'tx5', 'tqw', 'sda', 'sdf'],
+    #     ['sdf', 'tqw', 'tx3', 'tx4', 'tx2'],
+    #     ['abc', 'def', 'ghi', 'abc'],  # Another SCC
+    #     ['ghi', 'def', 'jkl', 'ghi']   # Another SCC
     # ]
-    
+    start_time = time.time()
     all_transactions, local_sequences = generate_transaction_orderings(pre_local_sequences)
     
     G = construct_graph(all_transactions, local_sequences)
@@ -80,32 +80,47 @@ def run():
 
     # Identify strongly connected components (SCCs)
     scc = list(nx.strongly_connected_components(G))
-    
+    # print(scc)
+
     # Condense the graph and create a condensed graph
     condensed_G = nx.condensation(G, scc)
-    
+    # visualize_graph(condensed_G)
+
     # Perform topological sort on the condensed graph
     topological_order = list(nx.topological_sort(condensed_G))
-
+    # print("TOPO order: ", topological_order)
+    
     # Reconstruct the sorted transactions based on condensed node order
     sorted_transactions = []
     for condensed_node in topological_order:
         original_vertices = scc[condensed_node]
         sorted_transactions.extend(sorted(original_vertices))
-    
-    print("Sorted Transactions:")
-    print(sorted_transactions)
+  
+
+    # print("Sorted Transactions:", flush=True)
+    # print(sorted_transactions, flush=True)
 
     # End measuring the time
     end_time = time.time()
     elapsed_time = end_time - start_time
 
     # Print the elapsed time in seconds and milliseconds
-    print(f"Elapsed Time: {elapsed_time:.4f} seconds")
-    print(f"Elapsed Time: {elapsed_time * 1000:.2f} milliseconds")
+    return elapsed_time
 
 def main():
-    run()
+    total_time = 0
+    num_iterations = 10
+
+    for _ in tqdm(range(num_iterations)):
+        pre_local_sequences = tx_generate(100000, 10)
+        start_time = time.time()
+        run(pre_local_sequences)
+        end_time = time.time()
+        iteration_time = end_time - start_time
+        total_time += iteration_time
+
+    average_time = total_time / num_iterations
+    print("Average execution time:", average_time, "seconds")
 
 if __name__ == '__main__':
     main()
