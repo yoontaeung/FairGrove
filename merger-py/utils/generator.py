@@ -81,10 +81,3 @@ def tx_generate(k, n):
     return sequence_transaction_hashes
 
 
-# def main():
-#     sequence_transaction_hashes = tx_generate(100, 5)
-#     print(f"Transaction hash matrix")
-#     print(sequence_transaction_hashes)
-
-# if __name__ == '__main__':
-#     main()
